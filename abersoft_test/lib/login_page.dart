@@ -1,6 +1,7 @@
-import 'dart:convert';
+// ignore_for_file: non_constant_identifier_names, unused_field
+
+import 'package:abersoft_test/list_product.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -69,6 +70,7 @@ class _LoginState extends State<Login> {
             padding: const EdgeInsets.symmetric(horizontal: 40.0),
             child: TextFormField(
               controller: Password,
+              textAlign: TextAlign.center,
               keyboardType: TextInputType.visiblePassword,
               decoration: InputDecoration(
                 labelText: "Password",
@@ -87,7 +89,7 @@ class _LoginState extends State<Login> {
             child: Center(
               child: TextButton(
                 style: TextButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 43, 126, 194),
+                  backgroundColor: const Color.fromARGB(255, 106, 187, 253),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -99,10 +101,14 @@ class _LoginState extends State<Login> {
                 ),
                 onPressed: () {
                   //validate
-                  if (_formKey.currentState!.validate()) {
-                    //send data to database with this method
-                    // SubmitLogin();
-                  }
+                  // if (_formKey.currentState!.validate()) {
+                  //send data to database with this method
+                  // SubmitLogin();
+                  // }
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProductList()));
                 },
               ),
             ),
