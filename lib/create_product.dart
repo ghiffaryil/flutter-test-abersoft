@@ -61,9 +61,8 @@ class _CreateProductState extends State<CreateProduct> {
                                   GestureDetector(
                                     onTap: () {
                                       setProductImage(
-                                              context, ImageSource.camera)
+                                              context, ImageSource.gallery)
                                           .then((value) {
-                                        // Rebuild widget ketika foto berubah
                                         setState(() {});
                                       });
                                     },

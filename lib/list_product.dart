@@ -1,9 +1,11 @@
-// ignore_for_file: avoid_unnecessary_containers, use_build_context_synchronously, prefer_typing_uninitialized_variables, non_constant_identifier_names
-import 'package:abersoft_test/create_product.dart';
-import 'package:abersoft_test/loginInformationStore/loginInformation.dart';
+// ignore_for_file: avoid_unnecessary_containers, use_build_context_synchronously, prefer_typing_uninitialized_variables, non_constant_identifier_names, avoid_print, depend_on_referenced_packages
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
+
+import 'package:abersoft_test/create_product.dart';
+import 'package:abersoft_test/loginInformationStore/loginInformation.dart';
 
 import 'login_page.dart';
 
@@ -21,38 +23,21 @@ class _ProductListState extends State<ProductList> {
   var u_Password;
   var u_Token;
 
-  final List<Map<String, dynamic>> productList = [
-    {
-      'name': 'Produk 1',
-      'price': 10.0,
-      'category': 'Kategori 1',
-    },
-    {
-      'name': 'Produk 2',
-      'price': 20.0,
-      'category': 'Kategori 2',
-    },
-    {
-      'name': 'Produk 3',
-      'price': 30.0,
-      'category': 'Kategori 1',
-    },
-    {
-      'name': 'Produk 4',
-      'price': 40.0,
-      'category': 'Kategori 2',
-    },
-    {
-      'name': 'Produk 5',
-      'price': 50.0,
-      'category': 'Kategori 1',
-    },
-    {
-      'name': 'Produk 6',
-      'price': 50.0,
-      'category': 'Kategori 6',
-    },
-  ];
+  List listBestProduct = [];
+  List listAllProduct = [];
+
+  // TAMPILAN
+  @override
+  void initState() {
+    super.initState();
+    refreshFunction();
+  }
+
+  //FUNGSI UNTUK REFRESH FUNGSI-FUNGSI TERTENTU
+  Future refreshFunction() async {
+    await getLoginInformationStore();
+    await getlistBestProduct();
+  }
 
   Future getLoginInformationStore() async {
     final LoginInformation = await _LoginInformation.readLoginInformation();
@@ -69,6 +54,34 @@ class _ProductListState extends State<ProductList> {
           builder: (BuildContext context) => const Login(),
         ),
       );
+    }
+  }
+
+  Future getlistBestProduct() async {
+    final String url =
+        'https://2e3d13cc-3d6d-4911-b94c-ba23cf332933.mock.pstmn.io/api/v1/products';
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $u_Token'},
+      );
+
+      if (response.statusCode == 200) {
+        print(jsonDecode(response.body));
+        var data = jsonDecode(response.body);
+
+        setState(() {
+          listBestProduct = data['bestProduct'];
+          listAllProduct = data['allProduct'];
+        });
+      } else {
+        // Gagal mendapatkan respons
+        print('Failed to fetch products. Error: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      // Terjadi kesalahan saat melakukan permintaan HTTP
+      print('Error: $e');
     }
   }
 
@@ -116,27 +129,22 @@ class _ProductListState extends State<ProductList> {
                 height: 20,
               ),
               SizedBox(
-                height: 120,
+                height: 150,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: productList.length,
+                  itemCount: listBestProduct.length,
                   itemBuilder: (context, index) {
-                    final product = productList[index];
-                    return Card(
-                      child: Container(
-                        width: 200.0,
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(product['name'] ?? 'No Name'),
-                            const SizedBox(height: 8.0),
-                            Text('${product['price']}'),
-                            const SizedBox(height: 8.0),
-                            Text('${product['category']}'),
-                          ],
+                    final dataBestProduct = listBestProduct[index];
+                    return Container(
+                      padding: const EdgeInsets.all(15),
+                      child: SizedBox(
+                          child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.network(
+                          dataBestProduct['imageUrl'],
+                          fit: BoxFit.cover,
                         ),
-                      ),
+                      )),
                     );
                   },
                 ),
@@ -154,28 +162,25 @@ class _ProductListState extends State<ProductList> {
               ),
               Expanded(
                   child: GridView.builder(
-                      itemCount: productList.length,
+                      itemCount: listAllProduct.length,
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        crossAxisSpacing: 8.0,
-                        mainAxisSpacing: 8.0,
+                        crossAxisSpacing: 20.0,
+                        mainAxisSpacing: 5.0,
                       ),
                       itemBuilder: (context, index) {
-                        final products = productList[index];
-                        return Card(
-                          child: Container(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(products['name']),
-                                const SizedBox(height: 8.0),
-                                Text(
-                                    'Harga: \$${products['price'].toStringAsFixed(2)}'),
-                                const SizedBox(height: 8.0),
-                                Text('Kategori: ${products['category']}'),
-                              ],
+                        final dataAllProduct = listAllProduct[index];
+                        return Container(
+                          padding: const EdgeInsets.all(16.0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: Image.network(
+                                '${dataAllProduct['imageUrl']}',
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         );
