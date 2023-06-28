@@ -1,9 +1,12 @@
-// ignore_for_file: unused_field, non_constant_identifier_names
+// ignore_for_file: unused_field, non_constant_identifier_names, unused_import, avoid_print
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+
+import 'list_product.dart';
 
 class CreateProduct extends StatefulWidget {
   const CreateProduct({Key? key}) : super(key: key);
@@ -17,13 +20,95 @@ class _CreateProductState extends State<CreateProduct> {
   var productName = TextEditingController();
   var productDescription = TextEditingController();
   final ImagePicker picker = ImagePicker();
-  XFile? Product_Image;
+  XFile? productImage;
 
   @override
   void initState() {
     super.initState();
     productName.text = "";
     productDescription.text = "";
+  }
+
+  void submitCreateProduct() async {
+    const String urlapi =
+        'https://2e3d13cc-3d6d-4911-b94c-ba23cf332933.mock.pstmn.io/api/v1/products';
+
+    var headers = {'Content-Type': 'application/json'};
+
+    Uint8List productImage_imagebytes = await productImage!.readAsBytes();
+    // ignore: unused_local_variable
+    String productImage_base64string =
+        "data:image/jpeg;base64,${base64.encode(productImage_imagebytes)}";
+
+    var body = json.encode({
+      "productName": productName.text,
+      "productDescription": productDescription.text,
+      "productImage": productImage_base64string,
+    });
+
+    http.Response response = await http.post(
+      Uri.parse(urlapi),
+      headers: headers,
+      body: body,
+    );
+
+    print('Create Response Status Code => ${response.statusCode}');
+
+    var responseJson = jsonDecode(response.body);
+
+    print('Create Response Body =>${response.body}');
+
+    var newidProduct = responseJson['id'];
+    var newNameProduct = responseJson['name'];
+    var newDescriptionProduct = responseJson['name'];
+
+    print(
+        'newidProduct $newidProduct, newNameProduct $newNameProduct, newDescriptionProduct $newDescriptionProduct');
+
+    if (response.statusCode == 200) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Success'),
+            content: const Text('Product Created'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const ProductList()));
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+        barrierDismissible: false,
+      );
+    } else {
+      print(response.reasonPhrase);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Oops'),
+            content: const Text('Upload Failed'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+        barrierDismissible: false,
+      );
+    }
   }
 
   @override
@@ -55,7 +140,7 @@ class _CreateProductState extends State<CreateProduct> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40.0),
                       child: Container(
-                        child: Product_Image != null
+                        child: productImage != null
                             ? Column(
                                 children: [
                                   GestureDetector(
@@ -69,7 +154,7 @@ class _CreateProductState extends State<CreateProduct> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(0),
                                       child: Image.file(
-                                        File(Product_Image!.path),
+                                        File(productImage!.path),
                                         fit: BoxFit.fill,
                                         width:
                                             MediaQuery.of(context).size.width -
@@ -79,7 +164,7 @@ class _CreateProductState extends State<CreateProduct> {
                                   ),
                                   const SizedBox(height: 5),
                                   const Text(
-                                    'Ketuk gambar untuk mengganti Foto',
+                                    'Tap image to change',
                                     style: TextStyle(fontSize: 13),
                                   )
                                 ],
@@ -103,7 +188,8 @@ class _CreateProductState extends State<CreateProduct> {
                                   ),
                                   tooltip: 'Pilih Foto',
                                   onPressed: () {
-                                    setProductImage(context, ImageSource.camera)
+                                    setProductImage(
+                                            context, ImageSource.gallery)
                                         .then((value) {
                                       // Rebuild widget ketika foto berubah
                                       setState(() {});
@@ -112,13 +198,14 @@ class _CreateProductState extends State<CreateProduct> {
                                 )),
                       ),
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40.0),
                       child: TextFormField(
                         controller: productName,
                         decoration: InputDecoration(
-                          labelText: "Name",
+                          labelText: "Product Name",
+                          hintText: 'Product Name',
                           isDense: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
@@ -142,12 +229,13 @@ class _CreateProductState extends State<CreateProduct> {
                       padding: const EdgeInsets.symmetric(horizontal: 40.0),
                       child: TextFormField(
                         controller: productDescription,
-                        maxLines: 4, // Jumlah baris yang ingin ditampilkan
+                        maxLines: 4,
                         decoration: InputDecoration(
+                          labelText: 'Product Description',
+                          hintText: 'Product Description',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
-                          hintText: 'Description',
                         ),
                       ),
                     ),
@@ -169,11 +257,7 @@ class _CreateProductState extends State<CreateProduct> {
                             style: TextStyle(color: Colors.white),
                           ),
                           onPressed: () {
-                            //validate
-                            // if (_formKey.currentState!.validate()) {
-                            //send data to database with this method
-                            // SubmitCreateProduct();
-                            // }
+                            submitCreateProduct();
                           },
                         ),
                       ),
@@ -192,12 +276,10 @@ class _CreateProductState extends State<CreateProduct> {
     final pickedImage = await picker.pickImage(source: source);
     if (pickedImage != null) {
       setState(() {
-        Product_Image = pickedImage;
+        productImage = pickedImage;
       });
       // Close dialog setelah gambar terpilih
-      Navigator.pop(context);
-      // createReportIncident(
-      //     Id_Patrol_Point_Shift_Schedule, patrol_point_Shift_Schedule_number);
+      // Navigator.pop(context);
     }
   }
 }

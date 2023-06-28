@@ -1,8 +1,8 @@
 // ignore_for_file: non_constant_identifier_names, unused_field, avoid_print
 
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
 import 'package:abersoft_test/list_product.dart';
 import 'package:abersoft_test/loginInformationStore/loginInformation.dart';
 
@@ -98,26 +98,25 @@ class _LoginState extends State<Login> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 125),
+                    const SizedBox(height: 105),
                     Center(
                         child: Image.asset(
                       'assets/image/logo/LOGO_BLUE_1.png',
                       width: 300,
                     )),
-                    const SizedBox(height: 65),
+                    const SizedBox(height: 105),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40.0),
                       child: TextFormField(
                         textAlign: TextAlign.center,
                         controller: Username,
                         decoration: InputDecoration(
-                          labelText: "Username",
+                          hintText: "Username",
+                          alignLabelWithHint: true,
                           isDense: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
-                          fillColor: Colors.white,
-                          filled: true,
                         ),
                         validator: (value) {
                           if (value!.isEmpty) {
@@ -137,13 +136,12 @@ class _LoginState extends State<Login> {
                         textAlign: TextAlign.center,
                         controller: Password,
                         decoration: InputDecoration(
-                          labelText: "Password",
+                          hintText: "Password",
+                          alignLabelWithHint: true,
                           isDense: true,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
-                          fillColor: Colors.white,
-                          filled: true,
                         ),
                         validator: (value) {
                           if (value!.isEmpty) {

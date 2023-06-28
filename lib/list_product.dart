@@ -58,7 +58,7 @@ class _ProductListState extends State<ProductList> {
   }
 
   Future getlistBestProduct() async {
-    final String url =
+    const String url =
         'https://2e3d13cc-3d6d-4911-b94c-ba23cf332933.mock.pstmn.io/api/v1/products';
 
     try {
@@ -72,6 +72,7 @@ class _ProductListState extends State<ProductList> {
         var data = jsonDecode(response.body);
 
         setState(() {
+          // Set State array list best product dan all product
           listBestProduct = data['bestProduct'];
           listAllProduct = data['allProduct'];
         });
@@ -88,6 +89,16 @@ class _ProductListState extends State<ProductList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+            onPressed: () => Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const Login())),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              size: 14,
+              color: Colors.black,
+            )),
+      ),
       body: SafeArea(
         child: Container(
           padding: const EdgeInsets.all(20),
@@ -129,7 +140,7 @@ class _ProductListState extends State<ProductList> {
                 height: 20,
               ),
               SizedBox(
-                height: 150,
+                height: MediaQuery.of(context).size.height * 0.20,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: listBestProduct.length,
@@ -137,14 +148,22 @@ class _ProductListState extends State<ProductList> {
                     final dataBestProduct = listBestProduct[index];
                     return Container(
                       padding: const EdgeInsets.all(15),
-                      child: SizedBox(
-                          child: ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.network(
-                          dataBestProduct['imageUrl'],
-                          fit: BoxFit.cover,
-                        ),
-                      )),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                              child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Image.network(
+                              dataBestProduct['imageUrl'],
+                              fit: BoxFit.cover,
+                            ),
+                          )),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text('${dataBestProduct['name']}')
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -173,15 +192,21 @@ class _ProductListState extends State<ProductList> {
                         final dataAllProduct = listAllProduct[index];
                         return Container(
                           padding: const EdgeInsets.all(16.0),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.network(
-                                '${dataAllProduct['imageUrl']}',
-                                fit: BoxFit.cover,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width:
+                                    MediaQuery.of(context).size.height * 0.18,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(15),
+                                  child: Image.network(
+                                    '${dataAllProduct['imageUrl']}',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
                               ),
-                            ),
+                              Text('${dataAllProduct['name']}')
+                            ],
                           ),
                         );
                       })),
